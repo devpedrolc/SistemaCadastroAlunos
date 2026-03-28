@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Escola Web</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        .item {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            width: 350px;
+        }
+
+        button.excluir {
+            background: #ff4444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Cadastro de Alunos</h1>
+    <input id="nome" placeholder="Nome">
+    <input id="mat" placeholder="Matrícula">
+    <button onclick="salvar()">Cadastrar</button>
+
+    <h3>Lista de Alunos</h3>
+    <div id="lista"></div>
+
+    <script>
+        async function carregar() {
+            const res = await fetch('/api/alunos');
+            const dados = await res.json();
+            document.getElementById('lista').innerHTML = dados.map(a => `
+                <div class="item">
+                    <span>${a.matricula} - ${a.nome}</span>
+                    <button class="excluir" onclick="remover('${a.matricula}')">Excluir</button>
+                </div>
+            `).join('');
+        }
+
+        async function salvar() {
+            const nome = document.getElementById('nome').value;
+            const mat = document.getElementById('mat').value;
+            await fetch('/api/alunos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, matricula: mat })
+            });
+            carregar();
+        }
+
+        async function remover(id) {
+            await fetch('/api/alunos/' + id, { method: 'DELETE' });
+            carregar();
+        }
+        carregar();
+    </script>
+</body>
+
+</html>
